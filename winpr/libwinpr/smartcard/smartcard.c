@@ -48,7 +48,7 @@ static const SCardApiFunctionTable* g_SCardApi = NULL;
 	InitOnceExecuteOnce(&g_Initialized, InitializeSCardApiStubs, NULL, NULL);            \
 	if (!g_SCardApi || !g_SCardApi->pfn##_name)                                          \
 	{                                                                                    \
-		WLog_DBG(TAG, "Missing function pointer g_SCardApi=%p->" xstr(pfn##_name) "=%p", \
+		WLog_DBG(TAG, "TBT was here: smartcard: Missing function pointer g_SCardApi=%p->" xstr(pfn##_name) "=%p", \
 		         g_SCardApi, g_SCardApi ? g_SCardApi->pfn##_name : NULL);                \
 		return SCARD_E_NO_SERVICE;                                                       \
 	}                                                                                    \
@@ -58,7 +58,7 @@ static const SCardApiFunctionTable* g_SCardApi = NULL;
 	InitOnceExecuteOnce(&g_Initialized, InitializeSCardApiStubs, NULL, NULL);            \
 	if (!g_SCardApi || !g_SCardApi->pfn##_name)                                          \
 	{                                                                                    \
-		WLog_DBG(TAG, "Missing function pointer g_SCardApi=%p->" xstr(pfn##_name) "=%p", \
+		WLog_DBG(TAG, "TBT was here: smartcard: Missing function pointer g_SCardApi=%p->" xstr(pfn##_name) "=%p", \
 		         g_SCardApi, g_SCardApi ? g_SCardApi->pfn##_name : NULL);                \
 		return NULL;                                                                     \
 	}                                                                                    \
@@ -68,7 +68,7 @@ static const SCardApiFunctionTable* g_SCardApi = NULL;
 	InitOnceExecuteOnce(&g_Initialized, InitializeSCardApiStubs, NULL, NULL);            \
 	if (!g_SCardApi || !g_SCardApi->pfn##_name)                                          \
 	{                                                                                    \
-		WLog_DBG(TAG, "Missing function pointer g_SCardApi=%p->" xstr(pfn##_name) "=%p", \
+		WLog_DBG(TAG, "TBT was here: smartcard: Missing function pointer g_SCardApi=%p->" xstr(pfn##_name) "=%p", \
 		         g_SCardApi, g_SCardApi ? g_SCardApi->pfn##_name : NULL);                \
 		return;                                                                          \
 	}                                                                                    \
@@ -84,11 +84,13 @@ const SCARD_IO_REQUEST g_rgSCardRawPci = { SCARD_PROTOCOL_RAW, 8 };
 
 static BOOL CALLBACK InitializeSCardApiStubs(PINIT_ONCE once, PVOID param, PVOID* context)
 {
+	printf("TBT: Initialize smart card!\n");
 #ifdef _WIN32
 	if (Windows_InitializeSCardApi() >= 0)
 		g_SCardApi = Windows_GetSCardApiFunctionTable();
 #else
 #if defined(WITH_SMARTCARD_PCSC)
+	printf("TBT: Initialize smart card pcsc backend!\n");
 	if (PCSC_InitializeSCardApi() >= 0)
 		g_SCardApi = PCSC_GetSCardApiFunctionTable();
 #endif

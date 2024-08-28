@@ -34,6 +34,9 @@
 
 #include <openssl/obj_mac.h>
 
+// #include <dlfcn.h>
+// #include "tbt/pkcs11.h"
+
 #define TAG FREERDP_TAG("smartcardlogon")
 
 struct SmartcardKeyInfo_st
@@ -125,6 +128,7 @@ void smartcardCertList_Free(SmartcardCertInfo** cert_list, size_t count)
 static BOOL add_cert_to_list(SmartcardCertInfo*** certInfoList, size_t* count,
                              SmartcardCertInfo* certInfo)
 {
+	WLog_DBG(TAG, "TBT: Add cert to list!");
 	size_t curCount = *count;
 	SmartcardCertInfo** curInfoList = *certInfoList;
 
@@ -222,6 +226,9 @@ static BOOL set_info_certificate(SmartcardCertInfo* cert, BYTE* certBytes, DWORD
 		return FALSE;
 	}
 
+	if (userFilter) {
+		WLog_DBG(TAG, "userFilter: `%s`\n", userFilter);
+	}
 	if (userFilter && (!cert->upn || (strcmp(cert->upn, userFilter) != 0)))
 	{
 		if (cert->userHint && strcmp(cert->userHint, userFilter) != 0)
@@ -232,12 +239,17 @@ static BOOL set_info_certificate(SmartcardCertInfo* cert, BYTE* certBytes, DWORD
 		}
 	}
 
+	if (domainFilter) {
+		WLog_DBG(TAG, "domainFilter: `%s`\n", domainFilter);
+	}
 	if (domainFilter && cert->domainHint && strcmp(cert->domainHint, domainFilter) != 0)
 	{
 		WLog_DBG(TAG, "discarding non matching cert by domain(%s) %s@%s", domainFilter,
 		         cert->userHint, cert->domainHint);
 		return FALSE;
 	}
+
+	WLog_DBG(TAG, "TBT: Certificate has been accepted!");
 
 	return TRUE;
 }
@@ -387,6 +399,8 @@ static BOOL list_provider_keys(const rdpSettings* settings, NCRYPT_PROV_HANDLE p
 	PVOID enumState = NULL;
 	SmartcardCertInfo** cert_list = *pcerts;
 	size_t count = *pcount;
+
+	WLog_DBG(TAG, "TBT: list_provider_keys");
 
 	while (NCryptEnumKeys(provider, scope, &keyName, &enumState, NCRYPT_SILENT_FLAG) ==
 	       ERROR_SUCCESS)
@@ -546,7 +560,7 @@ out:
 		ConvertWCharToUtf8(csp, cspa, sizeof(cspa));
 		char scopea[128] = { 0 };
 		ConvertWCharToUtf8(scope, scopea, sizeof(scopea));
-		WLog_WARN(TAG, "%s [%s] no certificates found", cspa, scopea);
+		WLog_WARN(TAG, "%s [%s] no certificates found :()", cspa, scopea);
 	}
 	*pcount = count;
 	*pcerts = cert_list;
@@ -559,6 +573,8 @@ static BOOL smartcard_hw_enumerateCerts(const rdpSettings* settings, LPCWSTR csp
                                         const char* domainFilter, SmartcardCertInfo*** scCerts,
                                         size_t* retCount)
 {
+
+	WLog_DBG(TAG, "TBT: smartcard_hw_enumerateCerts");
 	BOOL ret = FALSE;
 	LPWSTR scope = NULL;
 	NCRYPT_PROV_HANDLE provider = 0;
@@ -822,6 +838,10 @@ out_error:
 BOOL smartcard_enumerateCerts(const rdpSettings* settings, SmartcardCertInfo*** scCerts,
                               size_t* retCount, BOOL gateway)
 {
+	WLog_DBG(TAG, "TBT: smartcard_enumerateCerts <-");
+	// tbt();
+	// WLog_DBG(TAG, "TBT: smartcard_enumerateCerts <-");
+
 	BOOL ret = 0;
 	LPWSTR csp = NULL;
 	const char* ReaderName = freerdp_settings_get_string(settings, FreeRDP_ReaderName);
@@ -837,7 +857,9 @@ BOOL smartcard_enumerateCerts(const rdpSettings* settings, SmartcardCertInfo*** 
 	else
 	{
 		Username = freerdp_settings_get_string(settings, FreeRDP_Username);
+		WLog_DBG(TAG, "TBT: username: %p", Username);
 		Domain = freerdp_settings_get_string(settings, FreeRDP_Domain);
+		WLog_DBG(TAG, "TBT: domain: %p", Domain);
 	}
 
 	WINPR_ASSERT(settings);

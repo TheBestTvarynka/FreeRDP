@@ -248,7 +248,7 @@ static LONG WINAPI PCSC_SCardReleaseContext_Internal(SCARDCONTEXT hContext);
 
 static LONG PCSC_SCard_LogError(const char* what)
 {
-	WLog_WARN(TAG, "Missing function pointer %s=NULL", what);
+	WLog_WARN(TAG, "TBT was here: smartcard_pcsc: Missing function pointer %s=NULL", what);
 	return SCARD_E_UNSUPPORTED_FEATURE;
 }
 
@@ -1840,6 +1840,7 @@ static LONG WINAPI PCSC_SCardDisconnect(SCARDHANDLE hCard, DWORD dwDisposition)
 
 static LONG WINAPI PCSC_SCardBeginTransaction(SCARDHANDLE hCard)
 {
+	printf("PCSC_SCardBeginTransaction tbttbttbtbtbtbttbtbtbtbtbtbtbttbtbtbtbtbtbtbtbttbtbtbtbtbbt");
 	PCSC_LONG status = SCARD_S_SUCCESS;
 	PCSC_SCARDHANDLE* pCard = NULL;
 	PCSC_SCARDCONTEXT* pContext = NULL;
@@ -1849,13 +1850,17 @@ static LONG WINAPI PCSC_SCardBeginTransaction(SCARDHANDLE hCard)
 
 	pCard = PCSC_GetCardHandleData(hCard);
 
-	if (!pCard)
+	if (!pCard) {
+		printf("tbttbttbtbtbtbttbtbtbtbtbtbtbttbtbtbtbtbtbtbtbttbtbtbtbtbbt: RETURN ERROR CODE.");
 		return SCARD_E_INVALID_HANDLE;
+	}
 
 	pContext = PCSC_GetCardContextData(pCard->hSharedContext);
 
-	if (!pContext)
+	if (!pContext) {
+		printf("tbttbttbtbtbtbttbtbtbtbtbtbtbttbtbtbtbtbtbtbtbttbtbtbtbtbbt: RETURN ERROR CODE.");
 		return SCARD_E_INVALID_HANDLE;
+	}
 
 	if (pContext->isTransactionLocked)
 		return SCARD_S_SUCCESS; /* disable nested transactions */

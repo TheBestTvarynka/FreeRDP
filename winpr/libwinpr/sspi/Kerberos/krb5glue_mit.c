@@ -121,6 +121,7 @@ krb5_error_code krb5glue_get_init_creds(krb5_context ctx, krb5_principal princ, 
                                         krb5_prompter_fct prompter, char* password,
                                         SEC_WINPR_KERBEROS_SETTINGS* krb_settings)
 {
+	printf("TBT: MIT Kerberos has a place!\n");
 	krb5_error_code rv = 0;
 	krb5_deltat start_time = 0;
 	krb5_get_init_creds_opt* gic_opt = NULL;
@@ -132,11 +133,17 @@ krb5_error_code krb5glue_get_init_creds(krb5_context ctx, krb5_principal princ, 
 	WINPR_ASSERT(ctx);
 
 	rv = krb5_get_init_creds_opt_alloc(ctx, &gic_opt);
-	if (rv)
+	if (rv) {
+		printf("TBT: error in krb5_get_init_creds_opt_alloc\n");
 		goto cleanup;
+	} else {
+		printf("TBT: there is no error in krb5_get_init_creds_opt_alloc\n");
+	}
 
 	krb5_get_init_creds_opt_set_forwardable(gic_opt, 0);
 	krb5_get_init_creds_opt_set_proxiable(gic_opt, 0);
+
+	printf("TBT: mit krb5: two boring options have been passed.\n");
 
 	if (krb_settings)
 	{
@@ -232,12 +239,21 @@ krb5_error_code krb5glue_get_init_creds(krb5_context ctx, krb5_principal princ, 
 	if ((rv = krb5_get_init_creds_opt_set_out_ccache(ctx, gic_opt, ccache)))
 		goto cleanup;
 
+	printf("TBT: mit krb5: before krb5_init_creds_init.\n");
 	if ((rv =
-	         krb5_init_creds_init(ctx, princ, prompter, password, start_time, gic_opt, &creds_ctx)))
+	         krb5_init_creds_init(ctx, princ, prompter, password, start_time, gic_opt, &creds_ctx))) {
+		printf("TBT: mit krb5: error in krb5_init_creds_init.\n");
 		goto cleanup;
+	} else {
+		printf("TBT: mit krb5: there is no any error in krb5_init_creds_init.\n");
+	}
 
-	if ((rv = krb5_init_creds_get(ctx, creds_ctx)))
+	if ((rv = krb5_init_creds_get(ctx, creds_ctx))) {
+		printf("TBT: mit krb5: error in krb5_init_creds_get.\n");
 		goto cleanup;
+	} else {
+		printf("TBT: mit krb5: there is no any error in krb5_init_creds_get.\n");
+	}
 
 cleanup:
 	krb5_init_creds_free(ctx, creds_ctx);

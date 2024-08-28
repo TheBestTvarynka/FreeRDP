@@ -28,12 +28,17 @@ set(${MODULE_PREFIX}_SRCS
 	smartcard.c
 	smartcard.h)
 
+message(STATUS "TBT: ---------------------------------------tbt1- WITH_SMARTCARD_PCSC: ${WITH_SMARTCARD_PCSC}")
+
 if(WITH_SMARTCARD_PCSC)
+	message(STATUS "TBT: --------------------------------------- WITH_SMARTCARD_PCSC: ${WITH_SMARTCARD_PCSC}")
     winpr_definition_add(-DWITH_SMARTCARD_PCSC)
 	list(APPEND ${MODULE_PREFIX}_SRCS
 	smartcard_pcsc.c
 	smartcard_pcsc.h)
 endif()
+
+message(STATUS "TBT: --------------------------------------- WITH_SMARTCARD_INSPECT: ${WITH_SMARTCARD_INSPECT}")
 
 if(WITH_SMARTCARD_INSPECT)
 	winpr_definition_add(-DWITH_SMARTCARD_INSPECT)
