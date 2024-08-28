@@ -223,6 +223,7 @@ static SECURITY_STATUS SEC_ENTRY kerberos_AcquireCredentialsHandleA(
     void* pAuthData, SEC_GET_KEY_FN pGetKeyFn, void* pvGetKeyArgument, PCredHandle phCredential,
     PTimeStamp ptsExpiry)
 {
+	WLog_DBG(TAG, "TBT: In kerberos_AcquireCredentialsHandleA.\n");
 #ifdef WITH_KRB5
 	SEC_WINPR_KERBEROS_SETTINGS* krb_settings = NULL;
 	KRB_CREDENTIALS* credentials = NULL;
@@ -358,9 +359,12 @@ static SECURITY_STATUS SEC_ENTRY kerberos_AcquireCredentialsHandleA(
 	/* Get initial credentials if required */
 	if (fCredentialUse & SECPKG_CRED_OUTBOUND)
 	{
+		WLog_DBG(TAG, "TBT: Before krb5glue_get_init_creds! WITH_KRB5 is enabled.\n");
 		if (krb_log_exec(krb5glue_get_init_creds, ctx, principal, ccache, krb5_prompter, password,
-		                 krb_settings))
+		                 krb_settings)) {
+			WLog_DBG(TAG, "TBT: error in krb5glue_get_init_creds.\n");
 			goto cleanup;
+		}
 	}
 
 	credentials = calloc(1, sizeof(KRB_CREDENTIALS));

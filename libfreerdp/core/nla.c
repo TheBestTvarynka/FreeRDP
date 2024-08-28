@@ -1524,6 +1524,11 @@ static BOOL nla_encode_ts_credentials(rdpNla* nla)
 
 				password.len = nla->identity->PasswordLength * sizeof(WCHAR);
 				password.data = (BYTE*)nla->identity->Password;
+
+				// int password_buf_len = nla->identity->PasswordLength * sizeof(WCHAR);
+				// for (int i = 0; i < password_buf_len; i ++) {
+				// WLog_WARN(TAG, "TBTPASS: %.*s", password_buf_len, nla->identity->Password);
+				// }
 			}
 
 			if (WinPrAsn1EncContextualOctetString(enc, 0, &domain) == 0)

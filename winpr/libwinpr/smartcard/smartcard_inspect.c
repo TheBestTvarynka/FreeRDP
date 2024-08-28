@@ -803,6 +803,7 @@ static LONG WINAPI Inspect_SCardBeginTransaction(SCARDHANDLE hCard)
 	LONG status = 0;
 
 	WLog_Print(g_Log, g_LogLevel, "SCardBeginTransaction { hCard: %p", (void*)hCard);
+	printf("tbttbttbtbtbtbttbtbtbtbtbtbtbttbtbtbtbtbtbtbtbttbtbtbtbtbbt");
 
 	SCARDAPI_STUB_CALL_LONG(status, SCardBeginTransaction, hCard);
 

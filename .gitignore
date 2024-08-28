@@ -1,2 +1,9 @@
 **/CMakeCache.txt
 **/CMakeFiles
+freerdp-build/
+freerdp-build-pkcs11
+freerdp-build-*/
+freerdp-build-pkcs11-krb
+.vscode/
+client/X11/cli/tbt/
+out.txt

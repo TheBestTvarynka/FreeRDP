@@ -127,6 +127,7 @@ HMODULE LoadLibraryA(LPCSTR lpLibFileName)
 	if (!library)
 	{
 		const char* err = dlerror();
+		WLog_ERR(TAG, "TBT: error <%s>", lpLibFileName);
 		WLog_ERR(TAG, "failed with %s", err);
 		return NULL;
 	}

@@ -1485,6 +1485,17 @@ void ntlm_change_state(NTLM_CONTEXT* ntlm, NTLM_STATE state)
 	WINPR_ASSERT(ntlm);
 	WLog_DBG(TAG, "change state from %s to %s", ntlm_state_string(ntlm->state),
 	         ntlm_state_string(state));
+	if (ntlm->credentials) {
+		WLog_DBG(TAG, "CREDENTIALS PRESENT");
+		// if (ntlm->credentials->identity) {
+		WLog_DBG(TAG, "CREDENTIALS IDENTITY PRESENT");
+		WLog_DBG(TAG, "TBTPASSLENGTH %lu", ntlm->credentials->identity.PasswordLength);
+		// } else {
+		// 	WLog_DBG(TAG, "CREDENTIALS IDENTITY IS NOT PRESENT");
+		// }
+	} else {
+		WLog_DBG(TAG, "CREDENTIALS IS NOT PRESENT");
+	}
 	ntlm->state = state;
 }
 

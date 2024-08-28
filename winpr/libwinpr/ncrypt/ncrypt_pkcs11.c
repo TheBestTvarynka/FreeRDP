@@ -25,6 +25,8 @@
 #include <winpr/smartcard.h>
 #include <winpr/asn1.h>
 
+#include <dlfcn.h>
+
 #include "../log.h"
 #include "ncrypt.h"
 
@@ -636,10 +638,80 @@ static SECURITY_STATUS parseKeyName(LPCWSTR pszKeyName, CK_SLOT_ID* slotId, CK_B
 	return ERROR_SUCCESS;
 }
 
+// int tbt() {
+//     printf("TBT: TheBestTvarynka: 2.\n");
+
+//     char* pkcs11_module = "libykcs11.so.2.5.2";
+//     CK_ULONG nslots = 0;
+//     CK_SLOT_ID slots[MAX_SLOTS];
+//     CK_RV rv = 0;
+//     void* module = NULL;
+//     CK_FUNCTION_LIST_PTR p11;
+    
+//     typedef CK_RV (*c_get_function_list_t)(CK_FUNCTION_LIST_PTR_PTR);
+//     c_get_function_list_t c_get_function_list = NULL;
+
+//     module = dlopen(pkcs11_module, RTLD_LOCAL | RTLD_LAZY);
+//     if (!module) {
+//         printf("TBT: can not load pkcs11 module: %p. `%s`: %s :(\n", module, pkcs11_module, dlerror());
+//         return 2;
+//     } else {
+//         printf("TBT: pkcs11 module successfully loaded!\n");
+//     }
+
+//     c_get_function_list = (c_get_function_list_t)dlsym(module, "C_GetFunctionList");
+//     if (!c_get_function_list)
+//     {
+//         printf("TBT: can not find `C_GetFunctionList` symbol: %p :(\n", c_get_function_list);
+//         return 2;
+//     } else {
+//         printf("TBT: successfully found C_GetFunctionList!\n");
+//     }
+
+//     rv = c_get_function_list(&p11);
+//     if (rv != CKR_OK) {
+//         printf("TBT: C_GetFunctionList: failed! :(\n");
+//         return 2;
+//     } else {
+//         printf("TBT: C_GetFunctionList: succeeded;\n");
+//     }
+
+//     rv = p11->C_Initialize(NULL);
+//     if (rv != CKR_OK) {
+//         printf("TBT: C_Initialize: failed! :(\n");
+//         // return 2;
+//     } else {
+//         printf("TBT: C_Initialize: succeeded;\n");
+//     }
+
+//     rv = p11->C_GetSlotList(CK_TRUE, NULL, &nslots);
+//     if (rv != CKR_OK) {
+//         printf("TBT: C_GetSlotList(true, null, ptr): failed! :(\n");
+//         return 2;
+//     } else {
+//         printf("TBT: C_GetSlotList(true, null, ptr): succeeded;\n");
+//         printf("TBT: C_GetSlotList(true, null, ptr): we have %d | %ld | %lu slots;\n", nslots, nslots, nslots);
+//     }
+
+//     rv = p11->C_GetSlotList(CK_TRUE, slots, &nslots);
+//     if (rv != CKR_OK) {
+//         printf("TBT: C_GetSlotList(true, ptr, ptr): failed! :(\n");
+//         return 2;
+//     } else {
+//         printf("TBT: C_GetSlotList(true, ptr, ptr): succeeded;\n");
+//         printf("TBT: C_GetSlotList(true, null, ptr): we have %d | %ld | %lu slots;\n", nslots, nslots, nslots);
+//     }
+
+//     return 0;
+// }
+
 static SECURITY_STATUS NCryptP11EnumKeys(NCRYPT_PROV_HANDLE hProvider, LPCWSTR pszScope,
                                          NCryptKeyName** ppKeyName, PVOID* ppEnumState,
                                          DWORD dwFlags)
 {
+	WLog_DBG(TAG, "TBT: NCryptP11EnumKeys.");
+	// tbt();
+	WLog_DBG(TAG, "---------> TBT: NCryptP11EnumKeys.");
 	NCryptP11ProviderHandle* provider = (NCryptP11ProviderHandle*)hProvider;
 	P11EnumKeysState* state = (P11EnumKeysState*)*ppEnumState;
 	CK_RV rv = { 0 };
@@ -701,6 +773,9 @@ static SECURITY_STATUS NCryptP11EnumKeys(NCRYPT_PROV_HANDLE hProvider, LPCWSTR p
 			/* TODO: perhaps convert rv to NTE_*** errors */
 			WLog_WARN(TAG, "C_GetSlotList failed with %u", rv);
 			return NTE_FAIL;
+		} else {
+			WLog_DBG(TAG, "TBT: C_GetSlotList with NULL: success");
+			WLog_DBG(TAG, "TBT: We have %" PRIu32 " available slots.", state->nslots);
 		}
 
 		if (state->nslots > MAX_SLOTS)
@@ -713,6 +788,9 @@ static SECURITY_STATUS NCryptP11EnumKeys(NCRYPT_PROV_HANDLE hProvider, LPCWSTR p
 			/* TODO: perhaps convert rv to NTE_*** errors */
 			WLog_WARN(TAG, "C_GetSlotList failed with %u", rv);
 			return NTE_FAIL;
+		} else {
+			WLog_DBG(TAG, "TBT: C_GetSlotList without NULL: success");
+			WLog_DBG(TAG, "TBT: We have %" PRIu32 " available slots.", state->nslots);
 		}
 
 		ret = collect_keys(provider, state);
@@ -1185,6 +1263,7 @@ static SECURITY_STATUS initialize_pkcs11(HANDLE handle,
                                          CK_RV (*c_get_function_list)(CK_FUNCTION_LIST_PTR_PTR),
                                          NCRYPT_PROV_HANDLE* phProvider)
 {
+	WLog_DBG(TAG, "TBT: initialize_pkcs11");
 	SECURITY_STATUS status = ERROR_SUCCESS;
 	NCryptP11ProviderHandle* ret = NULL;
 	CK_RV rv = 0;
@@ -1201,7 +1280,9 @@ static SECURITY_STATUS initialize_pkcs11(HANDLE handle,
 	ret->baseProvider.enumKeysFn = NCryptP11EnumKeys;
 	ret->baseProvider.openKeyFn = NCryptP11OpenKey;
 
+	WLog_DBG(TAG, "TBT: c_get_function_list before.");
 	rv = c_get_function_list(&ret->p11);
+	WLog_DBG(TAG, "TBT: c_get_function_list after.");
 	if (rv != CKR_OK)
 	{
 		status = NTE_PROVIDER_DLL_FAIL;
@@ -1210,10 +1291,14 @@ static SECURITY_STATUS initialize_pkcs11(HANDLE handle,
 
 	WINPR_ASSERT(ret->p11->C_Initialize);
 	rv = ret->p11->C_Initialize(NULL);
+	WLog_DBG(TAG, "TBT: C_Initialize");
 	if (rv != CKR_OK)
 	{
+		WLog_DBG(TAG, "TBT: C_Initialize: fail");
 		status = NTE_PROVIDER_DLL_FAIL;
 		goto fail;
+	} else {
+		WLog_DBG(TAG, "TBT: C_Initialize: success");
 	}
 
 	*phProvider = (NCRYPT_PROV_HANDLE)ret;
@@ -1230,6 +1315,10 @@ SECURITY_STATUS NCryptOpenP11StorageProviderEx(NCRYPT_PROV_HANDLE* phProvider,
 {
 	SECURITY_STATUS status = ERROR_INVALID_PARAMETER;
 	LPCSTR defaultPaths[] = { "p11-kit-proxy.so", "opensc-pkcs11.so", NULL };
+
+	// WLog_DBG(TAG, "TBT: ----------------------------- NCryptOpenP11StorageProviderEx");
+	// tbt();
+	// WLog_DBG(TAG, "TBT: ----------------------------- NCryptOpenP11StorageProviderEx");
 
 	if (!phProvider)
 		return ERROR_INVALID_PARAMETER;
@@ -1257,6 +1346,10 @@ SECURITY_STATUS NCryptOpenP11StorageProviderEx(NCRYPT_PROV_HANDLE* phProvider,
 			status = NTE_PROV_TYPE_ENTRY_BAD;
 			goto out_load_library;
 		}
+
+		void* tbt = GetProcAddress(library, "C_GetInterface");
+		WLog_DBG(TAG, "TBT: C_GetInterface: '%p'", tbt);
+		// WLog_DBG(TAG, "TBT: C_GetInterface: '%d'", *((int*)tbt));
 
 		status = initialize_pkcs11(library, c_get_function_list, phProvider);
 		if (status != ERROR_SUCCESS)
